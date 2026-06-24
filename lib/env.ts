@@ -24,10 +24,10 @@ const envSchema = z.object({
   WHATSAPP_APP_SECRET: z.string().min(10).optional(),
   WHATSAPP_VERIFY_TOKEN: z.string().min(8).default('whatsappbrain_verify_token'),
 
-  // Email (optional)
-  RESEND_API_KEY: z.string().startsWith('re_').optional(),
-  RESEND_DOMAIN: z.string().optional(),
-  NOTIFICATION_EMAIL: z.string().email().optional(),
+  // Email (optional — empty string is valid too)
+  RESEND_API_KEY: z.string().optional().default(''),
+  RESEND_DOMAIN: z.string().optional().default('whatsappbrain.com'),
+  NOTIFICATION_EMAIL: z.string().optional().default(''),
 })
 
 function validateEnv() {
