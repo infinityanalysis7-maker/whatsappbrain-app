@@ -12,13 +12,15 @@ export const isGoogleConfigured = !!(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const providers: any[] = []
 
-// Always add Google provider — it will work if env vars are set, otherwise fail gracefully
-providers.push(
-  Google({
-    clientId: process.env.GOOGLE_CLIENT_ID || 'dummy_client_id',
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'dummy_client_secret',
-  })
-)
+// Only add Google provider if real credentials exist
+if (isGoogleConfigured) {
+  providers.push(
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    })
+  )
+}
 
 providers.push(
   Credentials({
@@ -52,7 +54,7 @@ providers.push(
 )
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  secret: process.env.AUTH_SECRET,
+  trustHost: true,
   providers,
   callbacks: {
     async signIn({ user, account }) {
