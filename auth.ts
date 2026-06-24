@@ -2,60 +2,42 @@ import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import Credentials from "next-auth/providers/credentials"
 
-export const isGoogleConfigured = !!(
-  process.env.GOOGLE_CLIENT_ID &&
-  process.env.GOOGLE_CLIENT_SECRET &&
-  process.env.GOOGLE_CLIENT_ID !== 'your_google_client_id' &&
-  process.env.GOOGLE_CLIENT_ID.length > 10
-)
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const providers: any[] = []
-
-// Only add Google provider if real credentials exist
-if (isGoogleConfigured) {
-  providers.push(
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  debug: true,
+  providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    })
-  )
-}
-
-providers.push(
-  Credentials({
-    name: "credentials",
-    credentials: {
-      email: { label: "Email", type: "email" },
-      password: { label: "Password", type: "password" },
-    },
-    async authorize(credentials) {
-      if (typeof credentials?.email !== 'string' || typeof credentials?.password !== 'string') {
-        return null
-      }
-      try {
-        const { getUserByEmail, saveUser } = await import('@/lib/db')
-        const { hashPassword, verifyPassword } = await import('@/lib/auth-helpers')
-        const user = await getUserByEmail(credentials.email)
-        if (!user) return null
-        const { valid, needsRehash } = await verifyPassword(credentials.password, user.password || '')
-        if (!valid) return null
-        if (needsRehash) {
-          const newHash = await hashPassword(credentials.password)
-          await saveUser({ ...user, password: newHash })
+    }),
+    Credentials({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (typeof credentials?.email !== 'string' || typeof credentials?.password !== 'string') {
+          return null
         }
-        return { id: user.email, name: user.businessName, email: user.email }
-      } catch (error) {
-        console.error('Auth authorize error:', error)
-        return null
-      }
-    },
-  })
-)
-
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  trustHost: true,
-  providers,
+        try {
+          const { getUserByEmail, saveUser } = await import('@/lib/db')
+          const { hashPassword, verifyPassword } = await import('@/lib/auth-helpers')
+          const user = await getUserByEmail(credentials.email)
+          if (!user) return null
+          const { valid, needsRehash } = await verifyPassword(credentials.password, user.password || '')
+          if (!valid) return null
+          if (needsRehash) {
+            const newHash = await hashPassword(credentials.password)
+            await saveUser({ ...user, password: newHash })
+          }
+          return { id: user.email, name: user.businessName, email: user.email }
+        } catch (error) {
+          console.error('Auth authorize error:', error)
+          return null
+        }
+      },
+    })
+  ],
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === 'google' && user?.email) {
