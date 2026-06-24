@@ -205,7 +205,11 @@ async function readLocalDb(): Promise<LocalJsonDb> {
     return JSON.parse(data)
   } catch (error) {
     const defaultDb: LocalJsonDb = { users: [], profiles: [], bot_rules: [], conversations: [], contacts: [], templates: [], broadcasts: [], campaigns: [] }
-    await writeFile(localPath, JSON.stringify(defaultDb, null, 2), 'utf-8')
+    try {
+      await writeFile(localPath, JSON.stringify(defaultDb, null, 2), 'utf-8')
+    } catch {
+      // Write failed (e.g. read-only filesystem on Vercel) — return defaults silently
+    }
     return defaultDb
   }
 }

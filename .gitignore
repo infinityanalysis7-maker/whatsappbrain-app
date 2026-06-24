@@ -45,3 +45,6 @@ test-results/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel
+.env*.local
