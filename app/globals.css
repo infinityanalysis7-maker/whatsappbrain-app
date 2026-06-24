@@ -1,26 +1,807 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --color-wb-bg: #FAF9F6;
+  --color-wb-green: #25D366;
+  --color-wb-dark: #128C7E;
+  --color-wb-ink: #1A1815;
+  --color-wb-soft: #5C574F;
+  --color-wb-line: #E8E0CF;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-playfair), Georgia, serif;
+  --font-mono: var(--font-jetbrains), 'SF Mono', 'Fira Code', monospace;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --animate-gradient: gradient 3s ease infinite;
+  --animate-spin-slow: spin 20s linear infinite;
+  --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-wb-bg);
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(232, 224, 207, 0.35) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(37, 211, 102, 0.04) 0%, transparent 40%);
+  color: var(--color-wb-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Hide scrollbar for clean mobile sidebar feel if needed */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E8E0CF;
+  border-radius: 3px;
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.35s ease-out forwards;
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-count-up {
+  animation: count-up 0.6s ease-out forwards;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.92); }
+}
+
+.animate-live-pulse {
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+/* ─── 3D & Animation Utilities ─── */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+@keyframes gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes spotlight {
+  0% { opacity: 0; transform: translate(-72%, -62%) scale(0.5); }
+  100% { opacity: 1; transform: translate(-50%, -40%) scale(1); }
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 20px rgba(37, 211, 102, 0.2), 0 0 40px rgba(37, 211, 102, 0.1); }
+  to { box-shadow: 0 0 30px rgba(37, 211, 102, 0.4), 0 0 60px rgba(37, 211, 102, 0.2); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* ─── Glassmorphism Base ─── */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ─── 3D Card Depth Effect ─── */
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease-out;
+}
+
+.card-3d:hover {
+  transform: translateZ(20px);
+}
+
+/* ─── Animated Border Beam ─── */
+@keyframes border-beam {
+  0% { offset-distance: 0%; }
+  100% { offset-distance: 100%; }
+}
+
+.border-beam {
+  position: relative;
+  overflow: hidden;
+}
+
+.border-beam::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(37, 211, 102, 0.5),
+    transparent
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: border-beam 3s linear infinite;
+}
+
+/* ─── Shimmer Loading Effect ─── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* ─── Cursor Glow Effect ─── */
+.cursor-glow {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(37, 211, 102, 0.1) 0%,
+    transparent 70%
+  );
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* ─── Animated Mesh Gradient Background ─── */
+.mesh-gradient {
+  background: 
+    radial-gradient(at 40% 20%, rgba(37, 211, 102, 0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(18, 140, 126, 0.06) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, rgba(37, 211, 102, 0.04) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, rgba(18, 140, 126, 0.06) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(37, 211, 102, 0.08) 0px, transparent 50%);
+  animation: mesh-move 20s ease-in-out infinite;
+}
+
+@keyframes mesh-move {
+  0%, 100% { background-position: 0% 0%, 100% 0%, 0% 50%, 100% 50%, 0% 100%; }
+  50% { background-position: 100% 0%, 0% 0%, 100% 50%, 0% 50%, 100% 100%; }
+}
+
+/* ─── Alive Background ─── */
+.alive-bg {
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(37, 211, 102, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 100%, rgba(18, 140, 126, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(245, 158, 11, 0.02) 0%, transparent 60%),
+    linear-gradient(180deg, #FAF9F6 0%, #F5F0E8 50%, #FAF9F6 100%);
+}
+
+/* ─── Sidebar Alive ─── */
+.sidebar-alive {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FEFDFB 40%, #FDF9F0 100%);
+  border-right: 1px solid rgba(232, 224, 207, 0.6);
+}
+
+/* ─── Card Surface ─── */
+.card-surface {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FEFEFE 50%, #FBF9F4 100%);
+  border: 1px solid rgba(232, 224, 207, 0.5);
+}
+
+.card-surface:hover {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FEFEFE 50%, #F9F6EE 100%);
+  border-color: rgba(37, 211, 102, 0.2);
+}
+
+/* ─── Stat Card Gradients ─── */
+.stat-emerald {
+  background: linear-gradient(135deg, rgba(37, 211, 102, 0.06) 0%, rgba(18, 140, 126, 0.03) 100%);
+  border: 1px solid rgba(37, 211, 102, 0.12);
+}
+.stat-emerald:hover {
+  border-color: rgba(37, 211, 102, 0.25);
+  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.08);
+}
+
+.stat-blue {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, rgba(99, 102, 241, 0.03) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.12);
+}
+.stat-blue:hover {
+  border-color: rgba(59, 130, 246, 0.25);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
+}
+
+.stat-amber {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.06) 0%, rgba(217, 119, 6, 0.03) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.12);
+}
+.stat-amber:hover {
+  border-color: rgba(245, 158, 11, 0.25);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.08);
+}
+
+.stat-purple {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(168, 85, 247, 0.03) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+}
+.stat-purple:hover {
+  border-color: rgba(139, 92, 246, 0.25);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08);
+}
+
+/* ─── Section Card ─── */
+.section-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FEFEFE 50%, #FBF9F4 100%);
+  border: 1px solid rgba(232, 224, 207, 0.5);
+  border-radius: 16px;
+  transition: all 0.2s ease;
+}
+
+.section-card:hover {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+}
+
+/* ─── Gradient Text ─── */
+.text-gradient-green {
+  background: linear-gradient(135deg, #128C7E 0%, #25D366 50%, #128C7E 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient 4s ease infinite;
+}
+
+/* ─── Accent Dot ─── */
+.accent-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #25D366;
+  box-shadow: 0 0 8px rgba(37, 211, 102, 0.4);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ─── Nav Item Hover ─── */
+.nav-item {
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: linear-gradient(180deg, #25D366, #128C7E);
+  border-radius: 0 2px 2px 0;
+  transition: height 0.15s ease;
+}
+
+.nav-item:hover::before {
+  height: 60%;
+}
+
+.nav-item.active::before {
+  height: 80%;
+}
+
+/* ─── Banner Gradient ─── */
+.banner-gradient {
+  background: linear-gradient(135deg, #128C7E 0%, #25D366 40%, #128C7E 80%, #075E54 100%);
+  background-size: 200% 200%;
+  animation: gradient 6s ease infinite;
+}
+
+/* ─── Empty State Pattern ─── */
+.empty-pattern {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(232, 224, 207, 0.4) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* ─── Stat Card Animations ─── */
+@keyframes stat-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stat-card-animate {
+  animation: stat-fade-in 0.4s ease-out both;
+}
+
+/* ─── Glow Ring ─── */
+.glow-ring {
+  box-shadow: 0 0 0 1px rgba(37, 211, 102, 0.1), 0 0 20px rgba(37, 211, 102, 0.06);
+}
+.glow-ring:hover {
+  box-shadow: 0 0 0 1px rgba(37, 211, 102, 0.2), 0 0 30px rgba(37, 211, 102, 0.1);
+}
+
+
+/* ═══════════════════════════════════════════════════
+   BRUTALIST / ANTI-DESIGN THEME
+   ═══════════════════════════════════════════════════ */
+
+/* ─── Base Reset ─── */
+[data-theme="brutalist"] {
+  --color-wb-bg: #F0F0F0;
+  --color-wb-green: #000000;
+  --color-wb-dark: #000000;
+  --color-wb-ink: #000000;
+  --color-wb-soft: #555555;
+  --color-wb-line: #000000;
+
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace !important;
+}
+
+[data-theme="brutalist"] body {
+  background-color: #F0F0F0 !important;
+  background-image: none !important;
+  color: #000000;
+}
+
+/* ─── Kill all border-radius ─── */
+[data-theme="brutalist"] * {
+  border-radius: 0 !important;
+}
+
+/* ─── All borders become solid black ─── */
+[data-theme="brutalist"] [class*="border-"] {
+  border-color: #000000 !important;
+  border-width: 2px !important;
+  border-style: solid !important;
+}
+
+/* ─── Section Card ─── */
+[data-theme="brutalist"] .section-card {
+  background: #FFFFFF !important;
+  border: 2px solid #000000 !important;
+  border-radius: 0 !important;
+  box-shadow: 6px 6px 0 #000000 !important;
+  transition: all 0.1s ease !important;
+}
+
+[data-theme="brutalist"] .section-card:hover {
+  box-shadow: 3px 3px 0 #000000 !important;
+  transform: translate(3px, 3px) !important;
+}
+
+/* ─── Alive Background → Raw Grid ─── */
+[data-theme="brutalist"] .alive-bg {
+  background: #F0F0F0 !important;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px) !important;
+  background-size: 20px 20px !important;
+}
+
+/* ─── Sidebar ─── */
+[data-theme="brutalist"] .sidebar-alive {
+  background: #FFFFFF !important;
+  border-right: 2px solid #000000 !important;
+  box-shadow: 4px 0 0 #000000 !important;
+}
+
+/* ─── Nav Items ─── */
+[data-theme="brutalist"] .nav-item::before {
+  background: #000000 !important;
+  border-radius: 0 !important;
+}
+
+[data-theme="brutalist"] .nav-item.active {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="brutalist"] .nav-item.active .text-wb-soft,
+[data-theme="brutalist"] .nav-item.active .text-wb-ink {
+  color: #FFFFFF !important;
+}
+
+[data-theme="brutalist"] .nav-item.active svg {
+  color: #FFFFFF !important;
+}
+
+/* ─── Accent Dot ─── */
+[data-theme="brutalist"] .accent-dot {
+  background: #000000 !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* ─── Stat Cards ─── */
+[data-theme="brutalist"] .stat-emerald,
+[data-theme="brutalist"] .stat-blue,
+[data-theme="brutalist"] .stat-amber,
+[data-theme="brutalist"] .stat-purple {
+  background: #FFFFFF !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 4px 4px 0 #000000 !important;
+}
+
+[data-theme="brutalist"] .stat-emerald:hover,
+[data-theme="brutalist"] .stat-blue:hover,
+[data-theme="brutalist"] .stat-amber:hover,
+[data-theme="brutalist"] .stat-purple:hover {
+  box-shadow: 2px 2px 0 #000000 !important;
+  transform: translate(2px, 2px) !important;
+  border-color: #000000 !important;
+}
+
+/* ─── Banner Gradient → Black Block ─── */
+[data-theme="brutalist"] .banner-gradient {
+  background: #000000 !important;
+  animation: none !important;
+}
+
+[data-theme="brutalist"] .banner-gradient * {
+  color: #FFFFFF !important;
+}
+
+[data-theme="brutalist"] .banner-gradient .bg-white\/95 {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+/* ─── Buttons ─── */
+[data-theme="brutalist"] button,
+[data-theme="brutalist"] a[class*="bg-wb-green"] {
+  border-radius: 0 !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="brutalist"] .bg-wb-green,
+[data-theme="brutalist"] [class*="bg-gradient-to-r from-wb-green"] {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+  box-shadow: 4px 4px 0 #555555 !important;
+}
+
+[data-theme="brutalist"] .bg-wb-green:hover,
+[data-theme="brutalist"] [class*="bg-gradient-to-r from-wb-green"]:hover {
+  background: #333333 !important;
+  box-shadow: 2px 2px 0 #555555 !important;
+  transform: translate(2px, 2px) !important;
+}
+
+/* ─── Inputs ─── */
+[data-theme="brutalist"] input,
+[data-theme="brutalist"] textarea,
+[data-theme="brutalist"] select {
+  border-radius: 0 !important;
+  border: 2px solid #000000 !important;
+  background: #FFFFFF !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  box-shadow: 3px 3px 0 #000000 !important;
+}
+
+[data-theme="brutalist"] input:focus,
+[data-theme="brutalist"] textarea:focus,
+[data-theme="brutalist"] select:focus {
+  box-shadow: 1px 1px 0 #000000 !important;
+  transform: translate(2px, 2px) !important;
+  outline: none !important;
+  ring: none !important;
+}
+
+/* ─── Typography ─── */
+[data-theme="brutalist"] h1,
+[data-theme="brutalist"] h2,
+[data-theme="brutalist"] h3 {
+  font-family: 'JetBrains Mono', monospace !important;
+  text-transform: uppercase !important;
+  letter-spacing: -0.02em !important;
+}
+
+[data-theme="brutalist"] .font-serif {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* ─── Header ─── */
+[data-theme="brutalist"] header {
+  background: #FFFFFF !important;
+  backdrop-filter: none !important;
+  border-bottom: 2px solid #000000 !important;
+}
+
+/* ─── Badge / Tag ─── */
+[data-theme="brutalist"] [class*="rounded-full"] {
+  border-radius: 0 !important;
+}
+
+[data-theme="brutalist"] [class*="px-"][class*="py-"][class*="text-xs"] {
+  border: 1px solid #000000 !important;
+  background: #FFFFFF !important;
+}
+
+/* ─── Card Surface ─── */
+[data-theme="brutalist"] .card-surface {
+  background: #FFFFFF !important;
+  border: 2px solid #000000 !important;
+}
+
+/* ─── Empty Pattern ─── */
+[data-theme="brutalist"] .empty-pattern {
+  background-image:
+    linear-gradient(45deg, #000 25%, transparent 25%),
+    linear-gradient(-45deg, #000 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #000 75%),
+    linear-gradient(-45deg, transparent 75%, #000 75%) !important;
+  background-size: 8px 8px !important;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0px !important;
+  opacity: 0.04 !important;
+}
+
+/* ─── Login / Signup Pages ─── */
+[data-theme="brutalist"] .bg-\[\#0a0f1a\] {
+  background: #F0F0F0 !important;
+}
+
+[data-theme="brutalist"] .bg-white\/\[0\.03\] {
+  background: #FFFFFF !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 6px 6px 0 #000000 !important;
+}
+
+[data-theme="brutalist"] .border-white\/\[0\.06\] {
+  border-color: #000000 !important;
+}
+
+[data-theme="brutalist"] .text-white {
+  color: #000000 !important;
+}
+
+[data-theme="brutalist"] .text-gray-400,
+[data-theme="brutalist"] .text-gray-500,
+[data-theme="brutalist"] .text-gray-600 {
+  color: #555555 !important;
+}
+
+[data-theme="brutalist"] .bg-white\/\[0\.04\] {
+  background: #FFFFFF !important;
+  border: 2px solid #000000 !important;
+}
+
+[data-theme="brutalist"] .border-white\/\[0\.08\] {
+  border-color: #000000 !important;
+}
+
+[data-theme="brutalist"] .placeholder-gray-600 {
+  color: #999999 !important;
+}
+
+/* ─── Green buttons on login ─── */
+[data-theme="brutalist"] .bg-wb-green {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="brutalist"] .hover\:bg-wb-dark:hover {
+  background: #333333 !important;
+}
+
+/* ─── Top accent line ─── */
+[data-theme="brutalist"] .h-px.bg-gradient-to-r.from-transparent {
+  background: #000000 !important;
+  height: 2px !important;
+}
+
+/* ─── Cursor Glow → Kill it ─── */
+[data-theme="brutalist"] .cursor-glow {
+  display: none !important;
+}
+
+[data-theme="brutalist"] [class*="pointer-events-none"][class*="fixed"][class*="z-50"] {
+  display: none !important;
+}
+
+/* ─── Onboarding ─── */
+[data-theme="brutalist"] [class*="from-wb-green"][class*="to-wb-dark"] {
+  background: #000000 !important;
+}
+
+[data-theme="brutalist"] [class*="bg-gradient-to-br"][class*="from-wb-green"] {
+  background: #000000 !important;
+}
+
+/* ─── Scrollbar ─── */
+[data-theme="brutalist"] ::-webkit-scrollbar-thumb {
+  background: #000000 !important;
+  border-radius: 0 !important;
+}
+
+[data-theme="brutalist"] ::-webkit-scrollbar-track {
+  background: #F0F0F0 !important;
+}
+
+/* ─── Tables ─── */
+[data-theme="brutalist"] table {
+  border-collapse: collapse !important;
+}
+
+[data-theme="brutalist"] th,
+[data-theme="brutalist"] td {
+  border: 1px solid #000000 !important;
+  padding: 8px 12px !important;
+}
+
+[data-theme="brutalist"] th {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+  text-transform: uppercase !important;
+  font-size: 0.65rem !important;
+  letter-spacing: 0.1em !important;
+}
+
+/* ─── Modal ─── */
+[data-theme="brutalist"] [class*="fixed"][class*="inset-0"][class*="bg-black\/"] {
+  background: rgba(0, 0, 0, 0.7) !important;
+}
+
+[data-theme="brutalist"] [class*="bg-white"][class*="rounded-2xl"] {
+  border-radius: 0 !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 8px 8px 0 #000000 !important;
+}
+
+/* ─── Progress / Bars ─── */
+[data-theme="brutalist"] [class*="h-2"][class*="rounded-full"] {
+  border-radius: 0 !important;
+  background: #E0E0E0 !important;
+  border: 1px solid #000000 !important;
+}
+
+[data-theme="brutalist"] [class*="bg-wb-green"][class*="h-2"] {
+  background: #000000 !important;
+}
+
+/* ─── Checkbox / Toggle ─── */
+[data-theme="brutalist"] input[type="checkbox"] {
+  border-radius: 0 !important;
+  border: 2px solid #000000 !important;
+  accent-color: #000000 !important;
+}
+
+/* ─── Animated elements → Kill animations ─── */
+[data-theme="brutalist"] [class*="animate-pulse"],
+[data-theme="brutalist"] [class*="animate-spin"],
+[data-theme="brutalist"] [class*="animate-ping"] {
+  animation: none !important;
+}
+
+/* ─── Logo area ─── */
+[data-theme="brutalist"] [class*="from-wb-green"][class*="to-wb-dark"][class*="rounded-xl"][class*="flex"][class*="items-center"][class*="justify-center"] {
+  background: #000000 !important;
+}
+
+/* ─── Quick action cards ─── */
+[data-theme="brutalist"] .section-card {
+  position: relative;
+}
+
+/* ─── Landing page overrides ─── */
+[data-theme="brutalist"] [class*="bg-\[\#0a0f1a\]"] {
+  background: #F0F0F0 !important;
+}
+
+[data-theme="brutalist"] [class*="bg-gradient-to-br"][class*="from-\[\#0a0f1a\]"] {
+  background: #F0F0F0 !important;
+}
+
+/* ─── Tag / Category badges ─── */
+[data-theme="brutalist"] [class*="rounded-xl"][class*="border"][class*="px-"][class*="py-"] {
+  border-radius: 0 !important;
+}
+
+/* ─── Onboarding step indicator ─── */
+[data-theme="brutalist"] [class*="rounded-full"][class*="bg-wb-green"] {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+}
+
+/* ─── AI Bubble ─── */
+[data-theme="brutalist"] [class*="from-wb-green\/5"][class*="to-wb-bg"] {
+  background: #FFFFFF !important;
+  border: 2px solid #000000 !important;
+}
+
+[data-theme="brutalist"] [class*="bg-gradient-to-br"][class*="from-wb-green"][class*="to-wb-dark"][class*="rounded-xl"][class*="flex"][class*="items-center"][class*="justify-center"] {
+  background: #000000 !important;
+}
+
+/* ─── Stat card inner icon ─── */
+[data-theme="brutalist"] [class*="w-9"][class*="h-9"][class*="rounded-xl"] {
+  border-radius: 0 !important;
+  border: 1px solid #000000 !important;
+}
+
+/* ─── Upgrade banner button ─── */
+[data-theme="brutalist"] .banner-gradient .bg-white\/95 {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 3px 3px 0 #000000 !important;
+}
+
+[data-theme="brutalist"] .banner-gradient .bg-white\/95:hover {
+  box-shadow: 1px 1px 0 #000000 !important;
+  transform: translate(2px, 2px) !important;
+}
+
+/* ─── Profile / Settings form groups ─── */
+[data-theme="brutalist"] [class*="space-y-"] > div {
+  border-color: transparent !important;
+}
+
+/* ─── Add "BRUTALIST" watermark ─── */
+[data-theme="brutalist"]::after {
+  content: '';
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  z-index: 9999;
+  content: 'BRUTALIST MODE';
 }

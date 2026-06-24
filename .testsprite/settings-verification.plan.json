@@ -1,0 +1,158 @@
+{
+  "projectId": "",
+  "type": "frontend",
+  "name": "Settings Page - Core Modules Verification",
+  "description": "Verifies that AI Auto-Pilot section, Smart Automation block with 5 toggles, and Developer Settings area all render correctly on the WhatsAppBrain dashboard settings page.",
+  "planSteps": [
+    {
+      "stepId": 1,
+      "action": "navigate",
+      "target": "http://localhost:3000/dashboard/settings",
+      "description": "Navigate to the Settings page"
+    },
+    {
+      "stepId": 2,
+      "action": "wait",
+      "target": "page",
+      "condition": "networkidle",
+      "description": "Wait for page to fully load"
+    },
+    {
+      "stepId": 3,
+      "action": "verify",
+      "target": "text=Settings",
+      "description": "Verify the Settings page header is visible"
+    },
+    {
+      "stepId": 4,
+      "action": "verify",
+      "target": "text=AI Auto-Pilot",
+      "description": "Verify the AI Auto-Pilot section is rendered"
+    },
+    {
+      "stepId": 5,
+      "action": "verify",
+      "target": "text=Auto-Reply to Everything",
+      "description": "Verify the Auto-Reply toggle label is present in AI Auto-Pilot"
+    },
+    {
+      "stepId": 6,
+      "action": "verify",
+      "target": "text=Smart Handoff",
+      "description": "Verify the Smart Handoff toggle label is present in AI Auto-Pilot"
+    },
+    {
+      "stepId": 7,
+      "action": "verify",
+      "target": "text=AI Fallback",
+      "description": "Verify the AI Fallback toggle label is present in AI Auto-Pilot"
+    },
+    {
+      "stepId": 8,
+      "action": "verify",
+      "target": "[role='switch']",
+      "description": "Verify toggle switches are rendered as accessible switch elements in AI Auto-Pilot (3 toggles expected)"
+    },
+    {
+      "stepId": 9,
+      "action": "verify",
+      "target": "text=Smart Automation",
+      "description": "Verify the Smart Automation section is rendered"
+    },
+    {
+      "stepId": 10,
+      "action": "verify",
+      "target": "text=Auto Profile Generation",
+      "description": "Verify toggle 1: Auto Profile Generation is present in Smart Automation"
+    },
+    {
+      "stepId": 11,
+      "action": "verify",
+      "target": "text=Smart Pricing Suggestions",
+      "description": "Verify toggle 2: Smart Pricing Suggestions is present in Smart Automation"
+    },
+    {
+      "stepId": 12,
+      "action": "verify",
+      "target": "text=Auto Rule Generation",
+      "description": "Verify toggle 3: Auto Rule Generation is present in Smart Automation"
+    },
+    {
+      "stepId": 13,
+      "action": "verify",
+      "target": "text=Sentiment Analysis",
+      "description": "Verify toggle 4: Sentiment Analysis is present in Smart Automation"
+    },
+    {
+      "stepId": 14,
+      "action": "verify",
+      "target": "text=Smart Scheduling",
+      "description": "Verify toggle 5: Smart Scheduling is present in Smart Automation"
+    },
+    {
+      "stepId": 15,
+      "action": "verify",
+      "target": "text=Developer Settings",
+      "description": "Verify the Developer Settings expandable section header is visible"
+    },
+    {
+      "stepId": 16,
+      "action": "click",
+      "target": "text=Developer Settings",
+      "description": "Click to expand the Developer Settings section"
+    },
+    {
+      "stepId": 17,
+      "action": "verify",
+      "target": "text=WhatsApp Access Token",
+      "description": "Verify WhatsApp Access Token field is visible after expanding Developer Settings"
+    },
+    {
+      "stepId": 18,
+      "action": "verify",
+      "target": "text=Phone Number ID",
+      "description": "Verify Phone Number ID field is visible in Developer Settings"
+    },
+    {
+      "stepId": 19,
+      "action": "verify",
+      "target": "text=Webhook Verify Token",
+      "description": "Verify Webhook Verify Token field is visible in Developer Settings"
+    },
+    {
+      "stepId": 20,
+      "action": "verify",
+      "target": "text=Resend API Key",
+      "description": "Verify Resend API Key field is visible in Developer Settings"
+    },
+    {
+      "stepId": 21,
+      "action": "click",
+      "target": "text=Smart Handoff",
+      "description": "Toggle Smart Handoff off to verify toggle interaction works"
+    },
+    {
+      "stepId": 22,
+      "action": "verify",
+      "target": "[role='switch'][aria-checked='false']",
+      "description": "Verify the Smart Handoff toggle is now in the OFF state"
+    },
+    {
+      "stepId": 23,
+      "action": "click",
+      "target": "text=Smart Handoff",
+      "description": "Toggle Smart Handoff back on"
+    },
+    {
+      "stepId": 24,
+      "action": "verify",
+      "target": "[role='switch'][aria-checked='true']",
+      "description": "Verify the Smart Handoff toggle is now in the ON state"
+    },
+    {
+      "stepId": 25,
+      "action": "screenshot",
+      "description": "Capture final screenshot of the fully verified settings page"
+    }
+  ]
+}
