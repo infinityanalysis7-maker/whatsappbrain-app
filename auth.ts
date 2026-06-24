@@ -2,7 +2,13 @@ import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import Credentials from "next-auth/providers/credentials"
 
+export const isGoogleConfigured = !!(
+  process.env.GOOGLE_CLIENT_ID &&
+  process.env.GOOGLE_CLIENT_SECRET
+)
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   debug: true,
   providers: [
     Google({

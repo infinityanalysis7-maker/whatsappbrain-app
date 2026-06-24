@@ -48,13 +48,9 @@ export default function LoginPage() {
     }
   }
 
-  const handleGoogleLogin = async () => {
-    if (googleConfigured) {
-      setError('')
-      await signIn('google', { callbackUrl: '/dashboard' })
-    } else {
-      setIsGoogleOpen(true)
-    }
+  const handleGoogleLogin = () => {
+    // Let NextAuth handle the redirect automatically — simplest and most reliable
+    signIn('google', { callbackUrl: '/dashboard' })
   }
 
   const handleMockGoogleSelect = async (googleUser: { name: string; email: string }) => {
