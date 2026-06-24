@@ -5,20 +5,20 @@ import Credentials from "next-auth/providers/credentials"
 export const isGoogleConfigured = !!(
   process.env.GOOGLE_CLIENT_ID &&
   process.env.GOOGLE_CLIENT_SECRET &&
-  process.env.GOOGLE_CLIENT_ID !== 'your_google_client_id'
+  process.env.GOOGLE_CLIENT_ID !== 'your_google_client_id' &&
+  process.env.GOOGLE_CLIENT_ID.length > 10
 )
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const providers: any[] = []
 
-if (isGoogleConfigured) {
-  providers.push(
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    })
-  )
-}
+// Always add Google provider — it will work if env vars are set, otherwise fail gracefully
+providers.push(
+  Google({
+    clientId: process.env.GOOGLE_CLIENT_ID || 'dummy_client_id',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'dummy_client_secret',
+  })
+)
 
 providers.push(
   Credentials({
