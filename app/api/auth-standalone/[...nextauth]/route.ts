@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
 
     const auth = NextAuth({
       trustHost: true,
+      basePath: '/api/auth-standalone',
       providers: [
         Google({
           clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -64,6 +65,7 @@ export async function POST(request: NextRequest) {
 
     const auth = NextAuth({
       trustHost: true,
+      basePath: '/api/auth-standalone',
       providers: [
         Google({
           clientId: process.env.GOOGLE_CLIENT_ID!,
