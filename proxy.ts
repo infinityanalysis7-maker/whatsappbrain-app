@@ -6,7 +6,7 @@ export default function proxy(req: NextRequest) {
 
   if (
     pathname === '/' || pathname === '/login' || pathname === '/signup' ||
-    pathname.startsWith('/_next/') ||    pathname.startsWith('/api/auth') || pathname.startsWith('/api/whatsapp') || pathname.startsWith('/api/diagnostic') || pathname.startsWith('/favicon') ||
+    pathname.startsWith('/_next/') ||    pathname.startsWith('/api/auth') || pathname.startsWith('/api/whatsapp') || pathname.startsWith('/api/diagnostic') || pathname.startsWith('/api/test-google') || pathname.startsWith('/favicon') ||
     pathname.startsWith('/images')
   ) {
     if ((pathname === '/login' || pathname === '/signup') && isLoggedIn(req)) {
