@@ -225,10 +225,7 @@ async function writeLocalDb(db: LocalJsonDb): Promise<void> {
 
 // Users
 export async function getUserByEmail(email: string): Promise<DbUser | null> {
-  const db = await readLocalDb()
-  const local = db.users.find(u => u.email.toLowerCase() === email.toLowerCase())
-  if (local) return local
-
+  // Supabase FIRST — this is what matters on Vercel
   if (supabase) {
     const { data, error } = await supabase
       .from('users')
@@ -236,11 +233,20 @@ export async function getUserByEmail(email: string): Promise<DbUser | null> {
       .eq('email', email)
       .maybeSingle()
     if (!error && data) {
-      await writeLocalDb({ ...db, users: [...db.users.filter(u => u.email.toLowerCase() !== email.toLowerCase()), data as DbUser] })
+      // Cache to local (ignore write failures on Vercel)
+      try {
+        const db = await readLocalDb()
+        await writeLocalDb({ ...db, users: [...db.users.filter(u => u.email.toLowerCase() !== email.toLowerCase()), data as DbUser] })
+      } catch {}
       return data as DbUser
     }
     if (error) console.error('Supabase get user error:', error.message)
   }
+
+  // Local fallback
+  const db = await readLocalDb()
+  const local = db.users.find(u => u.email.toLowerCase() === email.toLowerCase())
+  if (local) return local
 
   return null
 }
@@ -248,14 +254,24 @@ export async function getUserByEmail(email: string): Promise<DbUser | null> {
 export async function createUser(user: DbUser): Promise<void> {
   const payload = { ...user, created_at: new Date().toISOString() }
 
-  const db = await readLocalDb()
-  db.users = db.users.filter(u => u.email.toLowerCase() !== user.email.toLowerCase())
-  db.users.push(payload)
-  await writeLocalDb(db)
-
+  // Supabase FIRST — this is what matters on Vercel
   if (supabase) {
     const { error } = await supabase.from('users').insert([payload])
-    if (error) console.error('Supabase create user sync error:', error.message)
+    if (error) {
+      console.error('❌ Supabase createUser error:', error)
+      throw new Error(error.message)
+    }
+    console.log('✅ User saved to Supabase')
+  }
+
+  // Local write SECOND — ignore if it fails (Vercel read-only filesystem)
+  try {
+    const db = await readLocalDb()
+    db.users = db.users.filter(u => u.email.toLowerCase() !== user.email.toLowerCase())
+    db.users.push(payload)
+    await writeLocalDb(db)
+  } catch {
+    // Don't throw — Supabase already succeeded
   }
 }
 
