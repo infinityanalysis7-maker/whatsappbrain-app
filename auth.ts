@@ -1,24 +1,41 @@
-import type { NextAuthConfig } from "next-auth"
+/**
+ * Auth module using truly dynamic imports to bypass Turbopack build-time evaluation.
+ *
+ * PROVEN: The test endpoint at /api/test-google creates a NextAuth instance using
+ * `await import("next-auth")` and it works perfectly on Vercel. The issue is that
+ * Turbopack (Next.js 16 default bundler) evaluates static imports and require()
+ * calls at build time when process.env.GOOGLE_CLIENT_ID is empty.
+ *
+ * FIX: Use `await import()` inside async functions that are only called at request
+ * time, ensuring env vars are available when NextAuth initializes.
+ */
 
-// Lazy initialization pattern: avoids Turbopack evaluating NextAuth() at build
-// time when process.env.GOOGLE_CLIENT_ID is empty. The test endpoint proved
-// that dynamic imports + runtime init work perfectly on Vercel.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+let _handlers: any = null
+let _signIn: any = null
+let _signOut: any = null
+let _auth: any = null
+let _initPromise: Promise<void> | null = null
 
-let _instance: ReturnType<typeof _init> | null = null
+async function ensureAuth() {
+  if (_handlers) return
+  if (!_initPromise) {
+    _initPromise = doInit()
+  }
+  await _initPromise
+}
 
-function _init() {
-  // Use require() so Turbopack can't evaluate this at build time
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const NextAuth = require("next-auth").default
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const Google = require("next-auth/providers/google").default
+async function doInit() {
+  console.error("[auth] Initializing NextAuth with dynamic import...")
+  console.error("[auth] GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID ? "present" : "MISSING")
+  console.error("[auth] GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET ? "present" : "MISSING")
+  console.error("[auth] AUTH_SECRET:", process.env.AUTH_SECRET ? "present" : "MISSING")
+  console.error("[auth] AUTH_URL:", process.env.AUTH_URL || "MISSING")
 
-  console.log("[auth] Initializing NextAuth at request time")
-  console.log("[auth] GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID ? "present" : "MISSING")
-  console.log("[auth] GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET ? "present" : "MISSING")
-  console.log("[auth] AUTH_SECRET:", process.env.AUTH_SECRET ? "present" : "MISSING")
+  const { default: NextAuth } = await import("next-auth")
+  const { default: Google } = await import("next-auth/providers/google")
 
-  const authConfig: NextAuthConfig = {
+  const result = NextAuth({
     trustHost: true,
     providers: [
       Google({
@@ -70,43 +87,40 @@ function _init() {
     pages: {
       signIn: "/login",
     },
-  }
+  })
 
-  return NextAuth(authConfig)
+  _handlers = result.handlers
+  _signIn = result.signIn
+  _signOut = result.signOut
+  _auth = result.auth
+
+  console.error("[auth] ✅ NextAuth initialized successfully")
 }
 
-function getAuth() {
-  if (!_instance) {
-    try {
-      _instance = _init()
-    } catch (error) {
-      console.error("[auth] ❌ Initialization FAILED:", error)
-      throw error
-    }
-  }
-  return _instance
-}
-
-// Lazy exports: resolve at request time, not build time
 export const isGoogleConfigured = true
 
 export const handlers = {
   async GET(request: Request) {
-    return getAuth().handlers.GET(request)
+    await ensureAuth()
+    return _handlers!.GET(request)
   },
   async POST(request: Request) {
-    return getAuth().handlers.POST(request)
+    await ensureAuth()
+    return _handlers!.POST(request)
   },
 }
 
-export async function signIn(...args: Parameters<ReturnType<typeof _init>["signIn"]>) {
-  return getAuth().signIn(...args)
+export async function signIn(...args: any[]) {
+  await ensureAuth()
+  return _signIn!(...args)
 }
 
-export async function signOut(...args: Parameters<ReturnType<typeof _init>["signOut"]>) {
-  return getAuth().signOut(...args)
+export async function signOut(...args: any[]) {
+  await ensureAuth()
+  return _signOut!(...args)
 }
 
-export async function auth(...args: Parameters<ReturnType<typeof _init>["auth"]>) {
-  return getAuth().auth(...args)
+export async function auth(...args: any[]): Promise<any> {
+  await ensureAuth()
+  return _auth!(...args)
 }
