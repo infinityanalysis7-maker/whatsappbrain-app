@@ -18,9 +18,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const { getUserByEmail, createUser, createDefaultProfileIfNotExists } = await import('@/lib/db')
           const crypto = await import('crypto')
           const { hashPassword } = await import('@/lib/auth-helpers')
+
+          console.log('🔍 Checking user:', user.email)
           const existingUser = await getUserByEmail(user.email)
+          console.log('🔍 Existing user:', existingUser ? 'FOUND' : 'NOT FOUND')
+
           if (!existingUser) {
             const randomPass = crypto.randomBytes(16).toString('hex')
+            console.log('🔍 Creating user...')
             await createUser({
               email: user.email.toLowerCase(),
               password: await hashPassword(randomPass),
@@ -29,10 +34,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               city: 'New Delhi',
               plan: 'free',
             })
+            console.log('✅ User created')
           }
+
+          console.log('🔍 Creating profile...')
           await createDefaultProfileIfNotExists(user.email.toLowerCase())
+          console.log('✅ Profile done')
+
         } catch (error) {
-          console.error('Error creating user/profile on Google sign-in:', error)
+          console.error('❌ SUPABASE ERROR:', error)
         }
       }
       return true
