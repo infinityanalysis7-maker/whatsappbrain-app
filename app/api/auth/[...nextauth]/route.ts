@@ -1,41 +1,20 @@
 import { handlers } from '@/auth'
+import { NextRequest } from 'next/server'
 
-async function handlerWithLogging(request: Request) {
-  try {
-    const response = await handlers.GET?.(request) ?? new Response('No handler', { status: 404 })
-    return response
-  } catch (error: unknown) {
-    console.error('[auth-route] FULL ERROR:', JSON.stringify({
-      message: error instanceof Error ? error.message : String(error),
-      name: error instanceof Error ? error.name : 'unknown',
-      stack: error instanceof Error ? error.stack : undefined,
-    }))
-    throw error
-  }
-}
-
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     return await handlers.GET(request)
   } catch (error: unknown) {
-    console.error('[auth-route] GET ERROR:', JSON.stringify({
-      message: error instanceof Error ? error.message : String(error),
-      name: error instanceof Error ? error.name : 'unknown',
-      stack: error instanceof Error ? error.stack : undefined,
-    }))
+    console.error('[auth-route] GET ERROR:', error instanceof Error ? error.message : String(error))
     throw error
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     return await handlers.POST(request)
   } catch (error: unknown) {
-    console.error('[auth-route] POST ERROR:', JSON.stringify({
-      message: error instanceof Error ? error.message : String(error),
-      name: error instanceof Error ? error.name : 'unknown',
-      stack: error instanceof Error ? error.stack : undefined,
-    }))
+    console.error('[auth-route] POST ERROR:', error instanceof Error ? error.message : String(error))
     throw error
   }
 }
