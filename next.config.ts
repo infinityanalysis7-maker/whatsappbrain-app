@@ -31,6 +31,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Disable powered-by header
   poweredByHeader: false,
+  // Needed for Supabase + NextAuth compatibility on Vercel
+  serverExternalPackages: ['@supabase/supabase-js'],
 };
 
 export default nextConfig;
