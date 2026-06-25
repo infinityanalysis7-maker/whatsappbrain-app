@@ -259,7 +259,7 @@ export async function createUser(user: DbUser): Promise<void> {
     const { error } = await supabase.from('users').insert([payload])
     if (error) {
       console.error('❌ Supabase createUser error:', error)
-      throw new Error(error.message)
+      return
     }
     console.log('✅ User saved to Supabase')
   }
