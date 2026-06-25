@@ -54,29 +54,46 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return
     }
 
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 8000)
+    let cancelled = false
+    const maxRetries = 3
+    const retryDelay = 2000
 
-    fetch('/api/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'verify', email: session.user.email }),
-      signal: controller.signal,
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    async function verifyWithRetry(attempt: number): Promise<void> {
+      if (cancelled || attempt > maxRetries) return
+
+      try {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 10000)
+
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'verify', email: session!.user!.email }),
+          signal: controller.signal,
+        })
         clearTimeout(timeout)
-        if (data.success && data.user) {
+
+        const data = await res.json()
+        if (!cancelled && data.success && data.user) {
           setUser(data.user)
-        } else {
-          // Clear stale session and redirect
+        } else if (!cancelled && attempt < maxRetries) {
+          // Retry — Supabase might be cold-starting
+          await new Promise(r => setTimeout(r, retryDelay))
+          await verifyWithRetry(attempt + 1)
+        } else if (!cancelled) {
           signOut({ callbackUrl: '/login', redirect: true })
         }
-      })
-      .catch(() => {
-        clearTimeout(timeout)
-        signOut({ callbackUrl: '/login', redirect: true })
-      })
+      } catch {
+        if (!cancelled && attempt < maxRetries) {
+          await new Promise(r => setTimeout(r, retryDelay))
+          await verifyWithRetry(attempt + 1)
+        } else if (!cancelled) {
+          signOut({ callbackUrl: '/login', redirect: true })
+        }
+      }
+    }
+
+    verifyWithRetry(0)
 
     // Check if user has any bot rules
     fetch(`/api/rules?userId=${encodeURIComponent(session.user.email)}`)
@@ -88,11 +105,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       })
       .catch(() => {})
 
-    // Safety: if session is stuck loading for >10s, force redirect to login
+    // Safety: if session is stuck loading for >30s, force redirect to login
     const sessionTimeout = setTimeout(() => {
       if (!user) router.push('/login')
-    }, 10_000)
-    return () => clearTimeout(sessionTimeout)
+    }, 30_000)
+    return () => { cancelled = true; clearTimeout(sessionTimeout) }
   }, [session, status, router])
 
   const handleLogout = async () => {

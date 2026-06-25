@@ -9,7 +9,7 @@ const supabaseKey = supabaseServiceKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_
 
 export const isSupabaseConfigured = !!(supabaseUrl && supabaseKey)
 
-const SB_TIMEOUT = 3_000
+const SB_TIMEOUT = 10_000
 
 async function fetchWithTimeout(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const controller = new AbortController()
@@ -59,6 +59,14 @@ export function createAuthenticatedSupabaseClient(jwtToken: string): SupabaseCli
  */
 export function createPublicSupabaseClient(): SupabaseClient | null {
   if (!isSupabaseConfigured) {
+    return null
+  }
+
+  // Extra guard: ensure URL is actually valid before calling createClient
+  try {
+    new URL(supabaseUrl!)
+  } catch {
+    console.error('[Supabase] Invalid supabaseUrl, skipping client creation')
     return null
   }
 
