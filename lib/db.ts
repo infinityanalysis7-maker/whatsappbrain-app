@@ -215,8 +215,12 @@ async function readLocalDb(): Promise<LocalJsonDb> {
 }
 
 async function writeLocalDb(db: LocalJsonDb): Promise<void> {
-  const { writeFile, localPath } = await getLocalIo()
-  await writeFile(localPath, JSON.stringify(db, null, 2), 'utf-8')
+  try {
+    const { writeFile, localPath } = await getLocalIo()
+    await writeFile(localPath, JSON.stringify(db, null, 2), 'utf-8')
+  } catch {
+    // Silently ignore — read-only filesystem on Vercel, Supabase is primary
+  }
 }
 
 // ==========================================
@@ -232,14 +236,7 @@ export async function getUserByEmail(email: string): Promise<DbUser | null> {
       .select('*')
       .eq('email', email)
       .maybeSingle()
-    if (!error && data) {
-      // Cache to local (ignore write failures on Vercel)
-      try {
-        const db = await readLocalDb()
-        await writeLocalDb({ ...db, users: [...db.users.filter(u => u.email.toLowerCase() !== email.toLowerCase()), data as DbUser] })
-      } catch {}
-      return data as DbUser
-    }
+    if (!error && data) return data as DbUser
     if (error) console.error('Supabase get user error:', error.message)
   }
 
@@ -276,20 +273,26 @@ export async function createUser(user: DbUser): Promise<void> {
 }
 
 export async function saveUser(user: DbUser): Promise<void> {
-  const db = await readLocalDb()
-  const idx = db.users.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase())
-  if (idx >= 0) {
-    db.users[idx] = { ...db.users[idx], ...user }
-  } else {
-    db.users.push({ ...user, created_at: new Date().toISOString() })
-  }
-  await writeLocalDb(db)
-
+  // Supabase FIRST — primary storage on Vercel
   if (supabase) {
     const { error } = await supabase
       .from('users')
       .upsert(user, { onConflict: 'email' })
-    if (error) console.error('Supabase save user sync error:', error.message)
+    if (error) console.error('Supabase save user error:', error.message)
+  }
+
+  // Local write SECOND — best-effort, never throw
+  try {
+    const db = await readLocalDb()
+    const idx = db.users.findIndex(u => u.email.toLowerCase() === user.email.toLowerCase())
+    if (idx >= 0) {
+      db.users[idx] = { ...db.users[idx], ...user }
+    } else {
+      db.users.push({ ...user, created_at: new Date().toISOString() })
+    }
+    await writeLocalDb(db)
+  } catch {
+    // Don't throw — Supabase already handled
   }
 }
 
