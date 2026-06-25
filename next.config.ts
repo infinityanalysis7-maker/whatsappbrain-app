@@ -32,7 +32,7 @@ const nextConfig: NextConfig = {
   // Disable powered-by header
   poweredByHeader: false,
   // Needed for Supabase + NextAuth compatibility on Vercel
-  serverExternalPackages: ['@supabase/supabase-js'],
+  serverExternalPackages: ['@supabase/supabase-js', 'next-auth', 'next-auth/providers/google'],
 };
 
 export default nextConfig;
